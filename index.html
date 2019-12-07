@@ -1,0 +1,122 @@
+<html>
+<head>
+<style type="text/css">
+@font-face {
+    font-family: PacManFont;
+    src: url('pac-font.ttf') format('truetype');
+}
+@font-face {
+    font-family: CommodoreFont;
+    src: url('PetMe64.ttf');
+}
+</style>
+<link rel="stylesheet" type="text/css" href="checkboxes.css">
+</head>
+<body>
+<center>
+<canvas id="thecanvas" width="224" height="288"></canvas>
+<br><br><br>
+<div id="configui" style="display: none;">
+	<div><label>Use spacebar to progress in cutscenes</label></div>
+	<br>
+	<table>
+	<tr>
+	<td><center>
+	<label>Story mode</label><div class="slideThree"><input type="checkbox" value="None" id="storyMode" name="check" onclick='handleClick(this);' checked="yes"/><label for="storyMode"></label></div>
+	</center></td>
+	<td>
+	<label>Slow ghosts</label><div class="slideThree"><input type="checkbox" value="None" id="slowGhosts" name="check" onclick='handleClick(this);'/><label for="slowGhosts"></label></div>
+	</center></td>
+	</tr>
+	<tr>
+	<td><center>
+	<label>Big gfx</label><div class="slideThree"><input type="checkbox" value="None" id="bigGfx" name="check" onclick='handleClick(this);' checked="yes"/><label for="bigGfx"></label></div>
+	</center></td>
+	<td><center>
+	<label>Mega gfx</label><div class="slideThree"><input type="checkbox" value="None" id="megaGfx" name="check" onclick='handleClick(this);'/><label for="megaGfx"></label></div>
+	</center></td>
+	</tr>
+	</table>
+</div>
+</center>
+
+<script src="MetaWorld.js"></script>
+<script src="Configuration.js"></script>
+<script src="LoseScene.js"></script>
+<script src="WinScene.js"></script>
+<script src="DemoGhost.js"></script>
+<script src="ShipComputer.js"></script>
+<script src="SpeakScene.js"></script>
+<script src="Tiles.js"></script>
+<script src="utils.js"></script>
+<script src="EventEmitter.js"></script>
+<script src="FrozenGhost.js"></script>
+<script src="CrystalField.js"></script>
+<script src="PacManMonologue.js"></script>
+<script src="Text.js"></script>
+<script src="TileMarker.js"></script>
+<script src="WalkState.js"></script>
+<script src="DemoPacMan.js"></script>
+<script src="PacManDrawer.js"></script>
+<script src="FontUtils.js"></script>
+<script src="CanvasUtils.js"></script>
+<script src="AppearingRetroThing.js"></script>
+<script src="GhostDrawer.js"></script>
+<script src="Ghost.js"></script>
+<script src="GhostFactory.js"></script>
+<script src="TransitionControl.js"></script>
+<script src="StarrySky.js"></script>
+<script src="TileDrawer.js"></script>	
+<script src="GameObject.js"></script>
+<script src="PacMan.js"></script>
+<script src="PacManConstants.js"></script>
+<script src="ObjectHandler.js"></script>
+<script src="PacManTileLayer.js"></script>
+<script src="PacManGameScene.js"></script>
+<script src="RequestAnimationFrame.js"></script>
+<script src="PacManLoadScene.js"></script>
+<script src="PacManIntroScene.js"></script>
+<script src="SceneHandler.js"></script>
+<script src="Teleporter.js"></script>
+<script src="PacManGame.js"></script>
+<script>
+
+var theGame = null;
+
+function restartTheGame()
+{
+	if(theGame)
+	{
+		theGame.stop();
+	}
+	
+	var canvas = document.getElementById("thecanvas");
+	theGame = new PacManGame(canvas);
+	theGame.start();
+}
+
+restartTheGame();
+
+function handleClick(cb) {
+  //display("Clicked, new value = " + cb.checked);
+	Configuration.storyModeOn = document.getElementById("storyMode").checked;
+	Configuration.slowGhosts = document.getElementById("slowGhosts").checked;
+	Configuration.gfxScale = DefaultConfiguration.gfxScale;
+	if(!document.getElementById("bigGfx").checked)
+	{
+		Configuration.gfxScale--;
+	}
+	
+	if(document.getElementById("megaGfx").checked)
+	{
+		Configuration.gfxScale++;
+	}
+
+	restartTheGame();
+}
+
+
+</script>
+
+</body>
+</html>

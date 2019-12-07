@@ -1,0 +1,260 @@
+The Shaming of Pac-Man: A Remake of the Classic From the 80's With A Beginner Friendly Game Dev Class Framework
+
+In this long titled article, I will address two things:
+
+Firstly, I will present my Pac-Man remake that I prepared for the themed article contest of May. Following a brief technical overview and highlight of some code items of extra interest I will adress   the part that was most fun to me: The storyline I added to the game.
+
+Secondly, I will present in a semi-detailed overview the class structure that I used to make the game. This section is intended for beginner game programmers that may be a bit confused as to how to piece together their knowledge about animations and game loops and drawing to the screen into a finished, small, solid, game.
+
+My Pac-Man remake
+
+To start off with: The finished game is available at www.mrbenterprises.eu/PacMan . It is based on  JavaScript/HTML5 and may be slow, and may or may not work depending on age and model of your browser. I would recommend Chrome on Debian or Windows, since those are combinations I have successfully run the game on.
+
+Apart from the new story and the cut scenes and the space trucker persona I decided to give Pac-Man, the gameplay is a subset of the original Pac-Man described in detail in the excellent Pac-Man dossier by Jamey Pittman. Due to time running out I had to cut some aspects – in my version the ghosts only have the chase state, there are no power-ups (and thus no ghosts can “die”) and the spawning mechanism of the ghosts is a bit different. I also had to cut several cool things that I had in mind (teleport animation and ship energy core graphics, for example... sad!).
+
+What is identical though is the AI of the ghosts (minus a bug that was apparently part of the original), the ghosts and pacman graphics, and the tileset should be more or less identical as well.
+
+Some cool technical details
+
+While there are lots of things to mention, there are three things I felt particularly good about.
+
+1)I sort of really nailed MVC for the GameObjects. And letting the container class inherit the model class and pass itself to the view and controller was such a convenience.
+2)The base for the graphics is not data in any image format, but arrays holding the pixel on/off info. So one could say that the game has vector graphics, scalable to any size. The graphics scale is set at the start of the game and distributed to every entity. I included a configuration option for people to try out different settings in case of tiny/large screens.
+3)The ghosts are exactly the same except for their color, obviously, and their target tile acquiring component which is set at instantiation by the GhostFactory. It felt really good getting down a sort of component-based approach to the design in such a neat way.
+
+The (added) story line
+
+For me, the most fun in making games is the world and story creation, and hopefully leaving the gamer in a state of emotionally exhausted awe* at the epic end screen. As such I felt that just making a Pac-Man clone with reproduced gameplay mechanics would be bland. Early on I tried to come up with a different take on the whole thing, and decided on making Pac-Man an irritating, immoral douchebag space trucker, whose interest in his fellow xenomorph is decided on the basis of the profit he can make off of looting the unfortunate alien in question.
+
+* Who can hold back a tear of grief when in the win scene the stars drift slowly by, underlining the feeling of sadness and doom of the remnants of the ghost species.
+
+Further, the usual Pac-Man map is, of course, a spaceship, and the ghosts are members of an alien species whose home world is dying. Their millenia old search for a better life is put to hard test when Pac-Man enters the scene.
+
+All in all, I thought it could all be a nice lesson on the dire consequences of non-sustainable living and wasting others' resources.
+
+My  Beginner Friendly Game Dev Class Framework
+
+In this section I present the system of classes I used to make my Pac-Man game. The text is aimed at beginners who could use a focusing point for their first somewhat bigger (relative to previous projects) game.
+
+Our goal
+
+We want an ordered system that is easy to understand and that will enable easily going from, say, the loading screen to the title screen. We also want to be able to handle user input and draw to the screen, animate objects and route user input correctly.
+
+In addition, of course (?), we want a diversity of things moving on the screen. We want a VampireSnail that eerily stalks its prey in the dark of the midnight hours, but also a FriendlySnail that cares for the well being of the player and offers health potions at opportune time. Or maybe a... HockeyPlayer, or something, if you're into the weirder kind of stuff.
+
+Our way: The system
+
+What I made to be able to have all of the above, is a system that is made up of  four classes: The Game, the Scenehandler, the Scene, and the GameObject classes. Let's look at these classes in detail and take note of their functionality.
+
+Note: I describe the classes part in words, and part in a made-up computer language. So bear in mind that you might have to do some detective work to translate the different code bits into your own language of choice. In fact, you should view the code samples as sketchy code showing the important aspects of the class rather than the precise implementation.
+
+The classes
+
+The Game class
+
+The Game class is the top level class and, chronologically speaking, would be the first thing we create in the code. Ideally we want the whole game to work automagically just by the simple line
+
+Game g = new Game();
+
+Possibly with the addition of
+
+g.start();
+
+The Game class is responsible for:
+
+1)Creating a Scenehandler
+2)Creating the first Scene in the game
+3)Adding the first Scene to the SceneHandler
+4)Entering a game loop or somehow setting up a piece of code to be called repeatedly
+
+And, for each loop in the while loop:
+
+1)Getting input and distributing to the SceneHandler
+2)Calling update on the SceneHandler
+
+So, in code the Game class could look something like the following.
+
+Class Game()
+{
+	SceneHandler theSceneHandler = new SceneHandler();
+	firstScene = new TheFirstSceneConstructor(theSceneHandler);
+	theSceneHandler.addScene(firstScene);
+	while(true)
+	{
+		input = getUserInputInSomeWay();
+		sceneHandler.handleInput(input);
+		sceneHandler.update();
+		sleepSomeNumberOfMilliSeconds();
+	}
+}
+
+What are the important bits to notice here?
+
+First, the Game has a SceneHandler. It creates the first scene and gives it to the SceneHandler, but does not keep a reference to the first Scene. In this way, the Game does not have to know about later Scenes. It's okay for the Game class to know only about the first Scene, because as you will see below, a Scene can link itself to the next Scene, without the involvement of the Game class.
+
+Secondly, as mentioned, the Game sets up a game loop and tells the SceneHandler about updates and input.
+
+That was not so much, was it? Let's go on to the SceneHandler to further clarify the workings of the system.
+.
+
+The SceneHandler class
+
+In short, the SceneHandler manages a list of Scenes, and has a number of comvenience functions added to it. Let's have a look at the code:
+
+class SceneHandler()
+{
+	Array myScenes;
+
+	function addScene(scene)
+	{
+		myScenes.add(scene); //push
+	}
+
+	function removeLastScene()
+	{
+		myScenes.removeLastAdded(); //pop
+	}
+
+	function update()
+	{
+		myScenes.getLastElement().update();
+	}
+
+	function handleInput(input)
+	{
+		myScenes.getLastElement().handleInput(input);
+	}
+}
+
+As you can see, the main (and sort of only) point of the SceneHandler is that it has an array of Scenes. It also has functions to add a Scene to the last position of the array, and a function to remove the lastly added Scene.
+
+An important thing to notice , though, is that the SceneHandler's update and handleInput functions call the corresponding functions on the last Scene added. So, the last Scene in the array has a certain role. It is the current Scene. We could even have added an extra property to the SceneHandler class called currentScene to emphasise this (and made sure that it was always the same as the last element in the array).
+
+So using this setup, it means that only the current Scene gets input from the user and is notified of another cycle in the game loop.
+
+With this simple class digested, we walk on to the Scenes themselves, where we start filling things with content.
+
+The Scene class
+
+The important points of the Scene are:
+
+1)To create and store objects (GameObjects)
+2)To tell the stored objects when its time to update and draw themselves
+3)To pass user input to the objects
+4)Enable searching for an object from outside the class
+5)To store a reference to the SceneHandler and make that, too, available to the objects.
+
+In more words, we could also say that a Scene has an array of GameObjects. And when the Scene is created, it will fill its array of GameObjects with different objects, depending on what part of the game the Scene corresponds to (Options menu, title screen or main game screen, etc.). A very important aspect here, is that each GameObject will be given a reference to the Scene. This enables the objects to search for, remove and add new objects to the Scene! (by calling getObjects and manipulating the array).
+
+Since the objects are given a reference to the Scene, and can ask the Scene for its SceneHandler, the objects can also change the current scene! So if, in the main game scene, your CollisionDetection object notices that TheHero is at the same tile as TheMonsterThatEatsHeroes, it easily switches to the more appropriate GameOverScene.
+
+As game cycles pass, the Scene tells its objects when it's time to draw themselves to the screen and when it's time to update themselves. I.e, in the Scene update function,  it loops over its objects and calls the update and draw functions of the objects. First the update function on all objects, and then the draw function of all objects. In the same manner, user input notifications are passed on from upper classes to the objects.
+
+Let's look at some code, to hopefully straighten out remaining question marks.
+
+class Scene(sceneHandler)
+{
+	SceneHandler theSceneHandler = sceneHandler;
+	ArrayLikeClass myObjects;
+
+	// Create cool objects and put in myObjects here
+
+	GameObject theExampleObject = new ExampleObject(this);
+	this.addObject(theExampleObject );
+
+	function update()
+	{
+		foreach(object in myObjects)
+		{
+			object.update()
+		}
+
+		foreach(object in myObjects)
+		{
+			object.draw()
+		}
+	}
+
+	function getObjects()
+	{
+		return	myObjects;
+	}
+
+	function getScenehandler()
+	{
+		return theSceneHandler;
+	}
+
+	function handleInput(input)
+	{
+		foreach(object in myObjects)
+		{
+			object.handleInput(input)
+		}
+	}
+
+}
+
+The GameObject class
+
+The GameObjects are the Dragons, StrangeObelisks, Pencils, or whatever interesting things you want to have in your game. A GameObjects may even be an abstract thing like a Text or a GameOverTrigger. 
+
+There some things the system demands that all GameObjects have in common:
+
+The object needs to have functions for drawing and updating itself. It need not actually do something in those functions (although I guess most objects would), but it should have the functions so that they can be called. The drawing method for drawing itself to the screen, obviously, and the update method for AI considerations.
+
+Another important thing, which is needed for the system to be as flexible as we want it to be, is that a specific object can be identified by having a tag (or an id if you will). The good thing about a tag is that it allows us to search for a particular object in a collection of several objects.
+
+The reason that we want to search for a particular object is that one specific object might want to know something about another specific object. The WickedWolf, for example, would be interested in calling getPosition() on the object with the “LittleRedRidingHood” tag.
+
+In essence, the tag functionality allows our objects to be interactive and reactive towards each other. Objects may take decisions or pathfind or cease to exists, etc, based on the status of other objects.
+
+And as noted, since the gameObject has access to its parent Scene, it can remove or add objects, and also change the current Scene of the game completely through the Scenehandler.
+
+class GameObject(scene)
+{
+	theScene = scene;
+	myTag = “someTagAppropriateToTheGameObject”;
+
+	// other variables that this object needs 
+
+	function update()
+	{
+		// do something cool ? AI! Check for game over, search for sheep to eat, 
+	}
+	function draw()
+	{
+		// draw something that represents the view of this object (at this moment)
+	}
+	function handleInput()
+	{
+		// change something (or not) in the object depending on the input 
+	}
+}
+
+Now, it's important to realize, and you've already done that of course, that the line saying “other variables that this object needs” contains a possible ton of different things depending on what you want the object to do. Maybe you want to have objects to have a position (yes). Then you have to add that upon construction, and change the position in the update function, and draw the object at different places depending on position in the draw function.
+
+Summing up
+
+I hope that some recognition of a usable pattern has formed in the reader's brain. Should my noob pedagogy have left questions lingering behind - feel free to contact me on my twitter, @NiklasBjornberg
+
+Some final considerations
+
+MVC pattern
+
+Should you glance into the code of my Pac-Man project, you will find that the GameObjects are divided into even smaller classes too – namely Models, Views and Controllers. That is because I follow the Model-View-Controller pattern for the GameObjects. I find this a very powerful pattern, because it helps me to keep the code and data for the behavior (the controller part) of an object away from the code and data for drawing (the view part) an object and the model data. So all in all it helps to make things a lot less messy and facilitates changing parts without affecting other parts.
+
+Diverse requirements among GameObjects
+
+As you might have noted and pondered upon, in my system I propose that things like a GameOverTrigger or CollisionDetection be GameObjects and stored in the Scenes object array. This may pose some problems. For example, one object (WickedWolf comes to mind again) might want to examine the position of all the other objects. But this would mean, in the context of most languages and usual implementations, that all the objects in the object list has to implement a getPosition function, for example. In the generic problem statement, the expectations of one object affects all the other objects and forces them to have an interface that is possibly counterintuitive to their nature.
+
+How do we solve this? Here are some ways, in order of level of genious:
+
+1)Introduce separate lists for each kind of objects.
+2)We really make all objects have an interface that answers to the demand of all the others. This might be ok in a small project with very similar GameObjects.
+3)Based upon tag, you select only the objects you are interested in and that should, by the tag value, live up to your expectations.
+4)Instead of just getting the property or calling the function you want, you make sure it is there first. Either by a language supported way or using some sort of component based approach (see last month's article winner! Seems really interesting.)
+
+I really think number two is best. But for small projects number one may be less costly than setting up the infrastructure to support item 2.
+
+Niklas Björnberg

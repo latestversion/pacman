@@ -1,0 +1,53 @@
+thx
+
+what am i going to talk about?
+
+going to talk about a remake of paceman
+
+that i made in canvas and js
+
+so here’s an outline
+
+presentation of me
+me and js?
+
+game close-up / presentation
+why did i make it?
+remake the classics portray pm as a douchebag
+
+some aspects:
+
+code overview
+
+code structure (”engine”)
+
+input
+
+animation frame
+
+drawing canvas
+slight api!
+
+
+javascript
+
+inheritance
+animal dog cat rhinoceros poisonous rhino
+
+interfaces
+
+but tedious to implement and multiple inheritance
+one long chain of inheritance (my preferred choice in Swift, for example)
+
+however in script you can just fucking do it!
+
+what is my relation to js
+but i sort of love it
+why? i don’t know
+foreach a in array
+
+swift also python
+semicolons are stupid
+but then i remember like omg!!! i don’t need them
+
+also nice in js: chrome! developer tools! firefox/iceweasel.

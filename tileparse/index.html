@@ -1,0 +1,129 @@
+<html>
+<head>
+<script type="text/javascript">
+function insertText (text) {
+    document.getElementById('td1').innerHTML = text;
+}
+function addText(text) {
+    document.getElementById('td1').innerHTML += text;
+}
+</script>
+</head>
+<body>
+<canvas id="thecanvas"></canvas>
+   <table>
+        <tr>
+        <td id="td1"></td>
+        </tr>
+    </table>
+    <script type="text/javascript" >
+
+var i = new Image();
+
+
+function Pixel(r,g,b)
+{
+	this.r = r;
+	this.g = g;
+	this.b = b;
+}
+
+function parseTile(ctx,pixelsPerUnitLength,tileLength)
+{
+	var tileWidthInPixels = tileLength*pixelsPerUnitLength;
+	var tileHeightInPixels = tileWidthInPixels;
+	
+	var imgdata = ctx.getImageData(0,0,tileWidthInPixels,tileHeightInPixels);
+	var data = imgdata.data;
+	var dataPerPixel = 4;
+	
+	// We want to sample one pixel from every unit element in the tile
+	var tmpresult = [];
+	var pixelsPerRow = pixelsPerUnitLength*tileWidthInPixels;
+	var pixelsPerColumn = pixelsPerUnitLength;
+	
+	for(var row = 0;row < tileLength;row++)
+	{
+		for(var col = 0;col < tileLength;col++)
+		{
+			var pixelDataIndex = dataPerPixel*(row*pixelsPerRow+col*pixelsPerColumn);
+			var r = data[pixelDataIndex];
+			var g = data[pixelDataIndex+1];
+			var b = data[pixelDataIndex+2];
+			console.log("the blue is ");// + b);
+		
+			if(0 == r && 0 == g && 0 == b)
+			{
+				tmpresult.push(0);
+			}
+			else
+			{
+				tmpresult.push(1);
+			}
+		}
+	}
+		
+	var result = [];	
+	
+	while(tmpresult.length)
+	{
+		var t = tmpresult.splice(0,tileLength);
+		result.push(t);
+		console.log("Pushing down! Remaining length: " + tmpresult.length);
+	} 	
+	
+	return result;
+}
+
+function tileSheetParser(img)
+{
+	var pixelsPerUnitLength = 3;
+	var tileLength = 8;
+	
+	var tileSizeInPixels = pixelsPerUnitLength*tileLength;
+	
+	var rowsInImage = Math.floor(img.height/tileSizeInPixels);
+	var colsInImage = Math.floor(img.width/tileSizeInPixels);
+	console.log("row,cols in image: " + rowsInImage + "," + colsInImage);
+	
+	var tmpcanvas = document.getElementById("thecanvas");
+	tmpcanvas.width = tileSizeInPixels;
+	tmpcanvas.height = tileSizeInPixels;
+	var ctx = tmpcanvas.getContext("2d");	
+	
+	var result = [];
+	
+	for(var r = 0; r < rowsInImage;r++)
+	{
+		for(var c = 0; c < colsInImage;c++)
+		{
+			ctx.drawImage(img,c*tileSizeInPixels,r*tileSizeInPixels,tileSizeInPixels,tileSizeInPixels,0,0,tileSizeInPixels,tileSizeInPixels);
+			tiledata = parseTile(ctx,pixelsPerUnitLength,tileLength);
+			result.push(tiledata);
+		}
+	}
+	
+	return result;
+}
+
+
+function startparse()
+{
+	var imgdata = tileSheetParser(i);
+	var t = JSON.stringify(imgdata);
+	insertText(t);	
+}
+
+
+
+
+
+i.onload = startparse; 
+i.src = "tilesSheet.png";
+
+ insertText("Some text to enter TJOJWOJFSOJF SFOJS FS");
+ addText("Some text to enter TJOJWOJF");
+ 
+</script>
+<body>
+</html>
